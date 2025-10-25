@@ -38,17 +38,17 @@ class _YouTubeDownloaderPageState extends State<YouTubeDownloaderPage> {
   Map<String, dynamic>? _downloadData;
   final yt = YoutubeExplode();
 
-  // API endpoint for merging - Railway production backend
-  static const String mergeApiUrl = "https://youtubedownloader-production-4570.up.railway.app/merge";
+  // API endpoints - Railway production backend
+  static const String backendUrl = "https://youtubedownloader-production-4570.up.railway.app";
+  static const String mergeApiUrl = "$backendUrl/merge";
+  static const String videoInfoUrl = "$backendUrl/video-info";
 
   @override
   void dispose() {
     _urlController.dispose();
     yt.close();
     super.dispose();
-  }
-
-  Future<void> _mergeVideoAudio(String videoUrl, String audioUrl, String title) async {
+  }  Future<void> _mergeVideoAudio(String videoUrl, String audioUrl, String title) async {
     if (!mounted) return;
     
     // Create a ValueNotifier for progress updates
@@ -214,88 +214,52 @@ class _YouTubeDownloaderPageState extends State<YouTubeDownloaderPage> {
     }
 
     try {
-      // Get video metadata
-      var video = await yt.videos.get(url);
-      var manifest = await yt.videos.streamsClient.getManifest(video.id);
+      // Use backend yt-dlp endpoint instead of youtube-explode
+      print('DEBUG: Fetching from backend: $videoInfoUrl?url=$url');
       
-      print('DEBUG: Video title: ${video.title}');
-      print('DEBUG: Manifest has ${manifest.streams.length} total streams');
-      print('DEBUG: Video-only streams: ${manifest.videoOnly.length}');
-      print('DEBUG: Audio-only streams: ${manifest.audioOnly.length}');
-      print('DEBUG: Muxed streams: ${manifest.muxed.length}');
+      final response = await http.get(
+        Uri.parse('$videoInfoUrl?url=${Uri.encodeComponent(url)}'),
+      );
       
-      // Debug: Print details of all streams
-      for (var i = 0; i < manifest.streams.length; i++) {
-        var stream = manifest.streams[i];
-        print('DEBUG: Stream $i - Type: ${stream.runtimeType}, Tag: ${stream.tag}');
+      if (response.statusCode != 200) {
+        throw Exception('Backend returned ${response.statusCode}: ${response.body}');
       }
       
-      // Prepare download data
-      List<Map<String, dynamic>> videoOptions = [];
-      List<Map<String, dynamic>> audioOptions = [];
+      final data = json.decode(response.body);
       
-      // Try using ALL streams as a fallback
-      print('DEBUG: Attempting to use all streams...');
-      for (var stream in manifest.streams) {
-        try {
-          // Check if it's a video stream (has video codec)
-          if (stream is VideoStreamInfo) {
-            videoOptions.add({
-              'quality': '${stream.videoQualityLabel} (${stream.size.totalMegaBytes.toStringAsFixed(1)} MB)',
-              'url': stream.url.toString(),
-            });
-            print('DEBUG: Added video stream: ${stream.videoQualityLabel}');
-          }
-          // Check if it's audio stream
-          else if (stream is AudioStreamInfo) {
-            audioOptions.add({
-              'quality': '${(stream.bitrate.kiloBitsPerSecond).toStringAsFixed(0)} kbps (${stream.size.totalMegaBytes.toStringAsFixed(1)} MB)',
-              'url': stream.url.toString(),
-            });
-            print('DEBUG: Added audio stream: ${stream.bitrate.kiloBitsPerSecond} kbps');
-          }
-          // Check if it's a muxed stream (video + audio)
-          else if (stream is MuxedStreamInfo) {
-            videoOptions.add({
-              'quality': '${stream.videoQualityLabel} Combined (${stream.size.totalMegaBytes.toStringAsFixed(1)} MB)',
-              'url': stream.url.toString(),
-            });
-            print('DEBUG: Added muxed stream: ${stream.videoQualityLabel}');
-          }
-        } catch (e) {
-          print('DEBUG: Error processing stream: $e');
-        }
-      }
-      
-      print('DEBUG: Added ${videoOptions.length} video options');
-      print('DEBUG: Added ${audioOptions.length} audio options');
+      print('DEBUG: Got response from backend');
+      print('DEBUG: Video title: ${data['title']}');
+      print('DEBUG: Video options: ${data['videoOptions']?.length ?? 0}');
+      print('DEBUG: Audio options: ${data['audioOptions']?.length ?? 0}');
+      print('DEBUG: Muxed options: ${data['muxedOptions']?.length ?? 0}');
       
       setState(() {
         _downloadData = {
-          'title': video.title,
-          'author': video.author,
-          'duration': video.duration?.toString() ?? 'Unknown',
-          'thumbnail': video.thumbnails.highResUrl,
-          'videoOptions': videoOptions,
-          'audioOptions': audioOptions,
+          'title': data['title'],
+          'author': data['author'],
+          'duration': data['duration']?.toString() ?? 'Unknown',
+          'thumbnail': data['thumbnail'],
+          'videoOptions': data['videoOptions'] ?? [],
+          'audioOptions': data['audioOptions'] ?? [],
+          'muxedOptions': data['muxedOptions'] ?? [],
         };
         _isLoading = false;
       });
       
     } catch (e) {
       String errorMsg = e.toString();
-      bool isDecipherError = errorMsg.contains('decipher') || errorMsg.contains('cipher');
+      bool isServerError = errorMsg.contains('500') || errorMsg.contains('Failed to fetch');
       
       setState(() {
         _isLoading = false;
-        if (isDecipherError) {
-          _errorMessage = '⚠️ YouTube API Temporary Issue\n\n'
-              'The direct download method is currently unavailable due to YouTube changes.\n\n'
+        if (isServerError) {
+          _errorMessage = '⚠️ Server Temporary Issue\n\n'
+              'The download server is currently processing your request or experiencing issues.\n\n'
               '✅ SOLUTION: Please use one of the alternative websites below:\n'
               '• yt1s.com\n'
               '• y2mate.com\n'
               '• ytmp3.cc\n\n'
-              'These websites are updated more frequently and should work.';
+              'These websites are always available and should work.';
         } else {
           _errorMessage = 'Error: $errorMsg\n\nMake sure the URL is valid and the video is public.';
         }

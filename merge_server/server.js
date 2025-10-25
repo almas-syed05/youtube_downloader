@@ -4,6 +4,10 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
 
 const app = express();
 app.use(express.json());
@@ -13,6 +17,76 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Store merge jobs
 const mergeJobs = new Map();
+
+// NEW: yt-dlp endpoint for video info extraction
+app.get("/video-info", async (req, res) => {
+  const { url } = req.query;
+  
+  if (!url) {
+    return res.status(400).json({ error: "Missing url parameter" });
+  }
+
+  try {
+    console.log(`📹 Fetching video info for: ${url}`);
+    
+    // Use yt-dlp to get video information in JSON format
+    const { stdout } = await execAsync(`yt-dlp -J --no-playlist "${url}"`);
+    const videoInfo = JSON.parse(stdout);
+    
+    // Extract the best video and audio formats
+    const formats = videoInfo.formats || [];
+    
+    // Get video-only streams (sorted by quality)
+    const videoStreams = formats
+      .filter(f => f.vcodec && f.vcodec !== 'none' && (!f.acodec || f.acodec === 'none'))
+      .sort((a, b) => (b.height || 0) - (a.height || 0));
+    
+    // Get audio-only streams (sorted by bitrate)
+    const audioStreams = formats
+      .filter(f => f.acodec && f.acodec !== 'none' && (!f.vcodec || f.vcodec === 'none'))
+      .sort((a, b) => (b.abr || 0) - (a.abr || 0));
+    
+    // Get muxed streams (video + audio combined)
+    const muxedStreams = formats
+      .filter(f => f.vcodec && f.vcodec !== 'none' && f.acodec && f.acodec !== 'none')
+      .sort((a, b) => (b.height || 0) - (a.height || 0));
+    
+    // Prepare response
+    const response = {
+      title: videoInfo.title,
+      author: videoInfo.uploader || videoInfo.channel,
+      duration: videoInfo.duration,
+      thumbnail: videoInfo.thumbnail,
+      videoOptions: videoStreams.slice(0, 5).map(s => ({
+        quality: `${s.height}p (${s.vcodec}) - ${(s.filesize / 1024 / 1024).toFixed(1)} MB`,
+        url: s.url,
+        height: s.height,
+        format_id: s.format_id
+      })),
+      audioOptions: audioStreams.slice(0, 3).map(s => ({
+        quality: `${s.abr ? s.abr.toFixed(0) : 'Unknown'} kbps (${s.acodec}) - ${s.filesize ? (s.filesize / 1024 / 1024).toFixed(1) : 'Unknown'} MB`,
+        url: s.url,
+        format_id: s.format_id
+      })),
+      muxedOptions: muxedStreams.slice(0, 5).map(s => ({
+        quality: `${s.height}p Combined - ${s.filesize ? (s.filesize / 1024 / 1024).toFixed(1) : 'Unknown'} MB`,
+        url: s.url,
+        height: s.height,
+        format_id: s.format_id
+      }))
+    };
+    
+    console.log(`✅ Successfully fetched info for: ${videoInfo.title}`);
+    res.json(response);
+    
+  } catch (error) {
+    console.error(`❌ Error fetching video info:`, error.message);
+    res.status(500).json({ 
+      error: "Failed to fetch video information",
+      details: error.message 
+    });
+  }
+});
 
 app.post("/merge", async (req, res) => {
   const { videoUrl, audioUrl, title } = req.body;

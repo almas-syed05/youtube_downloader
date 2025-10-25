@@ -12,7 +12,7 @@ After each push to main/master branch, a new APK is automatically built and rele
 
 YouTube frequently updates their API, which can temporarily break the direct download feature. 
 
-**This app uses the latest version directly from GitHub** (not pub.dev) to get cipher fixes faster. However, if you still encounter errors like "could not find decipher function", please use the **alternative download websites** provided in the app:
+**This app uses a working community fork** ([Coronon/youtube_explode_dart](https://github.com/Coronon/youtube_explode_dart)) that patches YouTube API changes faster than the official version. However, if you still encounter errors, please use the **alternative download websites** provided in the app:
 - [yt1s.com](https://www.yt1s.com)
 - [y2mate.com](https://www.y2mate.com)  
 - [ytmp3.cc](https://ytmp3.cc)

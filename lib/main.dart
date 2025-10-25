@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -36,7 +35,6 @@ class _YouTubeDownloaderPageState extends State<YouTubeDownloaderPage> {
   bool _isLoading = false;
   String _errorMessage = '';
   Map<String, dynamic>? _downloadData;
-  final yt = YoutubeExplode();
 
   // API endpoints - Railway production backend
   static const String backendUrl = "https://youtubedownloader-production-4570.up.railway.app";
@@ -46,7 +44,6 @@ class _YouTubeDownloaderPageState extends State<YouTubeDownloaderPage> {
   @override
   void dispose() {
     _urlController.dispose();
-    yt.close();
     super.dispose();
   }  Future<void> _mergeVideoAudio(String videoUrl, String audioUrl, String title) async {
     if (!mounted) return;

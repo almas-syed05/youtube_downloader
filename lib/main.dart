@@ -283,9 +283,22 @@ class _YouTubeDownloaderPageState extends State<YouTubeDownloaderPage> {
       });
       
     } catch (e) {
+      String errorMsg = e.toString();
+      bool isDecipherError = errorMsg.contains('decipher') || errorMsg.contains('cipher');
+      
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Error: ${e.toString()}\n\nMake sure the URL is valid and the video is public.';
+        if (isDecipherError) {
+          _errorMessage = '⚠️ YouTube API Temporary Issue\n\n'
+              'The direct download method is currently unavailable due to YouTube changes.\n\n'
+              '✅ SOLUTION: Please use one of the alternative websites below:\n'
+              '• yt1s.com\n'
+              '• y2mate.com\n'
+              '• ytmp3.cc\n\n'
+              'These websites are updated more frequently and should work.';
+        } else {
+          _errorMessage = 'Error: $errorMsg\n\nMake sure the URL is valid and the video is public.';
+        }
       });
     }
   }

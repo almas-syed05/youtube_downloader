@@ -4,7 +4,7 @@ A Flutter-based Android application that allows users to download YouTube videos
 
 ## 📥 Download APK
 
-**[Download the latest APK here](https://github.com/YOUR_USERNAME/youtube_downloader/releases/latest)**
+**[Download the latest APK here](https://github.com/almas-syed05/youtube_downloader/releases/latest)**
 
 After each push to main/master branch, a new APK is automatically built and released.
 

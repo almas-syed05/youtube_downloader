@@ -10,14 +10,14 @@ After each push to main/master branch, a new APK is automatically built and rele
 
 ## ⚠️ Important Note
 
-YouTube frequently updates their API, which can temporarily break the direct download feature. 
+**NEW:** This app now uses a **backend server with yt-dlp** for video extraction! 
 
-**This app uses a working community fork** ([Coronon/youtube_explode_dart](https://github.com/Coronon/youtube_explode_dart)) that patches YouTube API changes faster than the official version. However, if you still encounter errors, please use the **alternative download websites** provided in the app:
+The backend automatically handles YouTube's API changes, cipher updates, and 403 errors. No more app updates needed when YouTube changes their system!
+
+If you still encounter errors, please use the **alternative download websites** provided in the app:
 - [yt1s.com](https://www.yt1s.com)
 - [y2mate.com](https://www.y2mate.com)  
 - [ytmp3.cc](https://ytmp3.cc)
-
-These are updated more frequently and provide reliable downloads when the app's direct method is unavailable.
 
 ## Features
 
@@ -28,11 +28,13 @@ These are updated more frequently and provide reliable downloads when the app's 
 - ⚡ Fast and easy to use
 - 🔄 Automatic video+audio merging via FFmpeg backend
 - 🌐 Built-in alternative download website links
+- 🚀 **Backend-powered with yt-dlp** - No more cipher errors!
 
 ## Technology Stack
 
 - **Framework**: Flutter
 - **Language**: Dart
+- **Backend**: Node.js + Express + FFmpeg + **yt-dlp**
 - **Target Platform**: Android
 - **Backend**: Node.js + Express + FFmpeg
 - **API**: youtube-explode-dart

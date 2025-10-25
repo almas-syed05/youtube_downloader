@@ -38,9 +38,8 @@ class _YouTubeDownloaderPageState extends State<YouTubeDownloaderPage> {
   Map<String, dynamic>? _downloadData;
   final yt = YoutubeExplode();
 
-  // API endpoint for merging (change this after deploying your server)
-  // For Android emulator, use 10.0.2.2 instead of localhost
-  static const String mergeApiUrl = "http://10.0.2.2:3000/merge";
+  // API endpoint for merging - Railway production backend
+  static const String mergeApiUrl = "https://youtubedownloader-production-4570.up.railway.app/merge";
 
   @override
   void dispose() {

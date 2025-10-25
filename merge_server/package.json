@@ -1,0 +1,15 @@
+{
+  "name": "youtube-merge-server",
+  "version": "1.0.0",
+  "description": "FFmpeg merge server for YouTube downloader",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "fluent-ffmpeg": "^2.1.2",
+    "cors": "^2.8.5"
+  }
+}

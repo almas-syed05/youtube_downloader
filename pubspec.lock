@@ -426,8 +426,8 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: e30861c6f3d8b343c7407654df89c850011c4aad
-      url: "https://github.com/Hexer10/youtube_explode_dart.git"
+      resolved-ref: caa3023386dbc10e69c99f49f491148094874671
+      url: "https://github.com/Coronon/youtube_explode_dart.git"
     source: git
     version: "2.5.2"
 sdks:

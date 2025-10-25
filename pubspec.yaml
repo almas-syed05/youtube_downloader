@@ -37,7 +37,7 @@ dependencies:
   url_launcher: ^6.2.1
   youtube_explode_dart:
     git:
-      url: https://github.com/Hexer10/youtube_explode_dart.git
+      url: https://github.com/Coronon/youtube_explode_dart.git
   http: ^1.2.0
 
 dev_dependencies:

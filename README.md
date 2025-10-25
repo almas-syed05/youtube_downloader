@@ -8,6 +8,15 @@ A Flutter-based Android application that allows users to download YouTube videos
 
 After each push to main/master branch, a new APK is automatically built and released.
 
+## ⚠️ Important Note
+
+YouTube frequently updates their API, which can temporarily break the direct download feature. If you encounter errors like "could not find decipher function", please use the **alternative download websites** provided in the app:
+- [yt1s.com](https://www.yt1s.com)
+- [y2mate.com](https://www.y2mate.com)  
+- [ytmp3.cc](https://ytmp3.cc)
+
+These are updated more frequently and provide reliable downloads when the app's direct method is unavailable.
+
 ## Features
 
 - 📱 Mobile-friendly interface optimized for Android
@@ -16,6 +25,7 @@ After each push to main/master branch, a new APK is automatically built and rele
 - 🔗 Simple URL paste interface
 - ⚡ Fast and easy to use
 - 🔄 Automatic video+audio merging via FFmpeg backend
+- 🌐 Built-in alternative download website links
 
 ## Technology Stack
 
